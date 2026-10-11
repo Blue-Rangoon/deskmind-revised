@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy import Boolean, String, DateTime, ForeignKey, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,6 +25,12 @@ class Bot(Base):
     widget_name: Mapped[str | None] = mapped_column(String, nullable=True)
     welcome_message: Mapped[str | None] = mapped_column(String, nullable=True)
     suggested_questions: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Whether the embedded widget / dashboard chat shows the "View sources"
+    # block under each answer. Defaults to True so every bot created before
+    # this setting existed keeps its current behaviour.
+    show_sources: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("true"), default=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="bots")

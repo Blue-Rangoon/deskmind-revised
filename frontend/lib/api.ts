@@ -196,8 +196,7 @@ export const WIDGET_THEMES: WidgetThemePreview[] = [
   {
     id: "cyber",
     name: "Cyber",
-    description:
-      "Near-black surfaces, hairline borders and a cyan accent — the CyberAtlas look.",
+    description: "Near-black surfaces, hairline borders and a cyan accent.",
     launcherBg: "linear-gradient(135deg, #22d3ee 0%, #06b6d4 60%, #0e7490 100%)",
     launcherIcon: "#04121a",
     windowBg: "#0c121c",
@@ -267,6 +266,8 @@ export interface Bot {
   widget_name?: string | null;
   welcome_message?: string | null;
   suggested_questions?: string[];
+  /** Whether the widget/chat shows "View sources" under each answer. */
+  show_sources?: boolean;
   document_count?: number;
   created_at?: string;
 }
@@ -321,6 +322,7 @@ export const updateBot = async (
     widget_name?: string;
     welcome_message?: string;
     suggested_questions?: string[];
+    show_sources?: boolean;
   },
 ): Promise<Bot> => {
   const response = await api.patch(`/bots/${botId}`, data);

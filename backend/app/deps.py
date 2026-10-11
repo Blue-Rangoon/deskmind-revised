@@ -117,6 +117,7 @@ class BotResponse(BaseModel):
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: list[str] = []
+    show_sources: bool = True
     document_count: int = 0
     created_at: str | None = None
 
@@ -131,6 +132,7 @@ class BotListResponse(BaseModel):
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: list[str] = []
+    show_sources: bool = True
     document_count: int = 0
     created_at: str | None = None
 

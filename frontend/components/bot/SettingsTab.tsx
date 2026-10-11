@@ -28,6 +28,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
   const [widgetName, setWidgetName] = useState("");
   const [color, setColor] = useState("#6366f1");
   const [theme, setTheme] = useState("classic");
+  const [showSources, setShowSources] = useState(true);
   const [welcome, setWelcome] = useState("");
   const [questions, setQuestions] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,6 +43,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
     setWidgetName(bot.widget_name || "");
     setColor(bot.widget_color || "#6366f1");
     setTheme(getWidgetTheme(bot.widget_theme, bot.widget_color).id);
+    setShowSources(bot.show_sources ?? true);
     setWelcome(bot.welcome_message || "");
     setQuestions(
       bot.suggested_questions && bot.suggested_questions.length > 0
@@ -66,6 +68,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
           .split("\n")
           .map((q) => q.trim())
           .filter(Boolean),
+        show_sources: showSources,
       });
       onSave(updated);
       setSaved(true);
@@ -188,6 +191,44 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
           every site your widget is embedded on after you save.
         </p>
         <ThemePicker value={theme} onChange={setTheme} widgetColor={color} />
+      </Card>
+
+      {/* Sources */}
+      <Card className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Sources</h3>
+        <p className="text-sm text-gray-500 mb-5">
+          Control whether cited sources appear under each answer in the chat
+          widget. When enabled, visitors can click "View sources" to expand the
+          documents the answer was grounded in.
+        </p>
+        <div className="flex items-center gap-4">
+          <label
+            className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-within:outline-none focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary-500"
+            aria-label={showSources ? "Showing sources" : "Hiding sources"}
+          >
+            <input
+              type="checkbox"
+              checked={showSources}
+              onChange={(e) => setShowSources(e.target.checked)}
+              className="sr-only"
+            />
+            <span
+              className={`absolute inset-0 rounded-full transition-colors ${
+                showSources ? "bg-primary-600" : "bg-gray-300"
+              }`}
+            />
+            <span
+              className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow ring-1 ring-black/10 transition-transform ${
+                showSources ? "translate-x-5" : "translate-x-1"
+              }`}
+            />
+          </label>
+          <span className="text-sm text-gray-700">
+            {showSources
+              ? "Display sources when answering"
+              : "Don't display sources when answering"}
+          </span>
+        </div>
       </Card>
 
       {/* Suggested questions */}

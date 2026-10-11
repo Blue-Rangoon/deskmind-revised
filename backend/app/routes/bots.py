@@ -48,6 +48,7 @@ class UpdateBotRequest(BaseModel):
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: List[str] | None = None
+    show_sources: bool | None = None
 
 
 class BotConfigResponse(BaseModel):
@@ -59,6 +60,7 @@ class BotConfigResponse(BaseModel):
     widget_name: str
     welcome_message: str
     suggested_questions: List[str]
+    show_sources: bool = True
 
 
 def _bot_to_response(bot: Bot, document_count: int = 0, request: Request | None = None) -> BotResponse:
@@ -76,6 +78,7 @@ def _bot_to_response(bot: Bot, document_count: int = 0, request: Request | None 
         widget_name=bot.widget_name,
         welcome_message=bot.welcome_message,
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
+        show_sources=bool(bot.show_sources),
         document_count=document_count,
         created_at=bot.created_at.isoformat() if bot.created_at else None,
     )
@@ -219,6 +222,7 @@ def list_bots(
             widget_name=bot.widget_name,
             welcome_message=bot.welcome_message,
             suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
+            show_sources=bool(bot.show_sources),
             document_count=counts.get(str(bot.id), 0),
             created_at=bot.created_at.isoformat() if bot.created_at else None,
         )
@@ -273,6 +277,8 @@ def update_bot(
         bot.welcome_message = payload.welcome_message
     if payload.suggested_questions is not None:
         bot.suggested_questions = json.dumps(payload.suggested_questions)
+    if payload.show_sources is not None:
+        bot.show_sources = payload.show_sources
 
     db.commit()
     db.refresh(bot)
@@ -295,6 +301,7 @@ def get_bot_config(
         widget_name=bot.widget_name or bot.name,
         welcome_message=bot.welcome_message or "",
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
+        show_sources=bool(bot.show_sources),
     )
 
 

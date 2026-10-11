@@ -13,7 +13,7 @@ DEFAULT_WIDGET_THEME = "classic"
 WIDGET_THEMES = frozenset(
     {
         "classic",
-        "cyber",   # CyberAtlas: near-black surfaces, cyan accent
+        "cyber",   # Cyber: near-black surfaces, cyan accent
         "aurora",  # deep indigo surfaces, violet gradient accents
         "sunrise", # warm light surfaces, orange accents
     }

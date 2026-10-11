@@ -12,6 +12,8 @@ export interface BotConfig {
   widget_name: string
   welcome_message: string
   suggested_questions: string[]
+  /** Whether to render the "View sources" block under answers (default true). */
+  show_sources?: boolean
 }
 
 export interface ChatRequest {
@@ -122,8 +124,7 @@ function classicTheme(color: string): WidgetTheme {
 }
 
 /**
- * CyberAtlas — near-black surfaces, hairline borders, cyan accent.
- * Built from the same tokens as the CyberAtlas design system.
+ * Cyber — near-black surfaces, hairline borders, cyan accent.
  */
 const CYBER_THEME: WidgetTheme = {
   id: 'cyber',
@@ -609,7 +610,7 @@ function createMessageBubble(role: 'user' | 'assistant' | 'error', text: string,
   textNode.textContent = text
   bubble.appendChild(textNode)
 
-  if (sources && sources.length > 0) {
+  if (showSources && sources && sources.length > 0) {
     const toggle = document.createElement('button')
     toggle.className = 'deskmind-sources-toggle'
     toggle.textContent = `View sources (${sources.length})`
@@ -757,6 +758,11 @@ async function describeErrorResponse(response: Response): Promise<string> {
 // which used to race the same conversation and produce spurious errors.
 let sending = false
 
+// Whether the bot owner wants "View sources" shown under answers. Set at
+// init from the public bot config; defaults to true (the historical
+// behaviour) when the config is unavailable or the field is absent.
+let showSources = true
+
 async function sendMessage(config: DeskMindConfig, messagesContainer: HTMLElement, input: HTMLInputElement, text: string): Promise<void> {
   const question = text.trim()
   if (!question || sending) return
@@ -887,6 +893,9 @@ export async function initWidget(cfg?: DeskMindConfig): Promise<void> {
   const color = botConfig?.widget_color || DEFAULT_COLOR
   const theme = resolveTheme(botConfig?.widget_theme, color)
   const displayName = botConfig?.widget_name || botConfig?.name || 'Chat'
+  // Honour the bot owner's "show sources" preference so the toggle in the
+  // dashboard settings actually takes effect in the embedded widget too.
+  showSources = botConfig?.show_sources ?? true
 
   const container = document.createElement('div')
   container.id = WIDGET_ID
