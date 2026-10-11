@@ -22,6 +22,7 @@ from app.deps import (
     require_bot_owner,
 )
 from app.models import Bot, Document, User
+from app.utils.widget_themes import WIDGET_THEMES, normalize_widget_theme
 
 router = APIRouter(prefix="/bots", tags=["bots"])
 
@@ -43,6 +44,7 @@ class UpdateBotRequest(BaseModel):
     name: str | None = None
     avatar: str | None = None
     widget_color: str | None = None
+    widget_theme: str | None = None
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: List[str] | None = None
@@ -53,6 +55,7 @@ class BotConfigResponse(BaseModel):
     name: str
     avatar: str | None = None
     widget_color: str
+    widget_theme: str
     widget_name: str
     welcome_message: str
     suggested_questions: List[str]
@@ -69,6 +72,7 @@ def _bot_to_response(bot: Bot, document_count: int = 0, request: Request | None 
         user_id=str(bot.user_id),
         avatar=avatar,
         widget_color=bot.widget_color,
+        widget_theme=normalize_widget_theme(bot.widget_theme),
         widget_name=bot.widget_name,
         welcome_message=bot.welcome_message,
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
@@ -211,6 +215,7 @@ def list_bots(
             user_id=str(bot.user_id),
             avatar=_resolve_avatar_url(bot.avatar, request),
             widget_color=bot.widget_color,
+            widget_theme=normalize_widget_theme(bot.widget_theme),
             widget_name=bot.widget_name,
             welcome_message=bot.welcome_message,
             suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
@@ -252,6 +257,16 @@ def update_bot(
         bot.avatar = payload.avatar
     if payload.widget_color is not None:
         bot.widget_color = payload.widget_color
+    if payload.widget_theme is not None:
+        if payload.widget_theme not in WIDGET_THEMES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Unknown widget theme '{payload.widget_theme}'. "
+                    f"Valid themes: {', '.join(sorted(WIDGET_THEMES))}"
+                ),
+            )
+        bot.widget_theme = payload.widget_theme
     if payload.widget_name is not None:
         bot.widget_name = payload.widget_name
     if payload.welcome_message is not None:
@@ -276,6 +291,7 @@ def get_bot_config(
         name=bot.name,
         avatar=_resolve_avatar_url(bot.avatar, request),
         widget_color=bot.widget_color or "#6366f1",
+        widget_theme=normalize_widget_theme(bot.widget_theme),
         widget_name=bot.widget_name or bot.name,
         welcome_message=bot.welcome_message or "",
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],

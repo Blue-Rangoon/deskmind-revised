@@ -18,6 +18,10 @@ class Bot(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     avatar: Mapped[str | None] = mapped_column(String, nullable=True)
     widget_color: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Visual theme applied to the embedded widget (launcher + chat window).
+    # NULL means "classic" (colour driven by widget_color); see
+    # app.utils.widget_themes for the canonical ids.
+    widget_theme: Mapped[str | None] = mapped_column(String, nullable=True)
     widget_name: Mapped[str | None] = mapped_column(String, nullable=True)
     welcome_message: Mapped[str | None] = mapped_column(String, nullable=True)
     suggested_questions: Mapped[str | None] = mapped_column(String, nullable=True)

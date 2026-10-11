@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import toast from "react-hot-toast";
-import { updateBot, deleteBot, type Bot } from "@/lib/api";
+import { updateBot, deleteBot, getWidgetTheme, type Bot } from "@/lib/api";
 import { BotAvatar } from "@/components/branding/BotAvatar";
 import { AvatarPicker } from "@/components/branding/AvatarPicker";
+import { ThemePicker } from "@/components/bot/ThemePicker";
 
 interface SettingsTabProps {
   botId: string;
@@ -26,6 +27,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [widgetName, setWidgetName] = useState("");
   const [color, setColor] = useState("#6366f1");
+  const [theme, setTheme] = useState("classic");
   const [welcome, setWelcome] = useState("");
   const [questions, setQuestions] = useState("");
   const [saving, setSaving] = useState(false);
@@ -39,6 +41,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
     setAvatar(bot.avatar ?? undefined);
     setWidgetName(bot.widget_name || "");
     setColor(bot.widget_color || "#6366f1");
+    setTheme(getWidgetTheme(bot.widget_theme, bot.widget_color).id);
     setWelcome(bot.welcome_message || "");
     setQuestions(
       bot.suggested_questions && bot.suggested_questions.length > 0
@@ -56,6 +59,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
         name: name.trim() || bot?.name || "",
         avatar: avatar,
         widget_color: color,
+        widget_theme: theme,
         widget_name: widgetName.trim() || undefined,
         welcome_message: welcome.trim() || undefined,
         suggested_questions: questions
@@ -173,6 +177,17 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
             rows={3}
           />
         </div>
+      </Card>
+
+      {/* Bot theme — drives the deployed widget's launcher icon and chat UI */}
+      <Card className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Bot Theme</h3>
+        <p className="text-sm text-gray-500 mb-5">
+          Pick how the chat widget looks on your website — the launcher icon
+          and the whole conversation window follow the theme. Changes apply to
+          every site your widget is embedded on after you save.
+        </p>
+        <ThemePicker value={theme} onChange={setTheme} widgetColor={color} />
       </Card>
 
       {/* Suggested questions */}

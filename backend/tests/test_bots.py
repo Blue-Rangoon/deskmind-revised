@@ -75,6 +75,55 @@ class TestBots:
         assert data["name"] == "Updated Bot"
         assert data["widget_color"] == "#ff0000"
 
+    def test_update_bot_widget_theme(self, client, test_user: User, test_bot: Bot):
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+        response = client.patch(
+            f"/bots/{test_bot.id}",
+            json={"widget_theme": "cyber"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["widget_theme"] == "cyber"
+
+    def test_update_bot_rejects_unknown_widget_theme(
+        self, client, test_user: User, test_bot: Bot
+    ):
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+        response = client.patch(
+            f"/bots/{test_bot.id}",
+            json={"widget_theme": "not-a-theme"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_legacy_bot_without_theme_reports_classic(
+        self, client, test_user: User, test_bot: Bot, db
+    ):
+        """Bots created before themes existed (widget_theme IS NULL) must
+        report 'classic' so the widget and dashboard render as before."""
+        from app.utils.security import create_access_token
+
+        test_bot.widget_theme = None
+        db.commit()
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+        response = client.get(
+            f"/bots/{test_bot.id}/config",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["widget_theme"] == "classic"
+
+        response = client.get(
+            f"/bots/{test_bot.id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["widget_theme"] == "classic"
+
     def test_delete_bot(self, client, test_user: User, test_bot: Bot, db):
         from app.utils.security import create_access_token
 

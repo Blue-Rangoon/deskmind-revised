@@ -113,6 +113,7 @@ class BotResponse(BaseModel):
     user_id: str
     avatar: str | None = None
     widget_color: str | None = None
+    widget_theme: str = "classic"
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: list[str] = []
@@ -126,6 +127,7 @@ class BotListResponse(BaseModel):
     user_id: str
     avatar: str | None = None
     widget_color: str | None = None
+    widget_theme: str = "classic"
     widget_name: str | None = None
     welcome_message: str | None = None
     suggested_questions: list[str] = []

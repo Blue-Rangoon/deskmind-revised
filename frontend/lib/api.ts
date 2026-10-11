@@ -147,6 +147,115 @@ export const guestLogin = async (
   return response.data as LoginResponse;
 };
 
+// ---------------------------------------------------------------------------
+// Widget themes
+//
+// Mirrors the theme ids the backend accepts (app/utils/widget_themes.py) and
+// the styles the embeddable widget applies (widget/src/widget.ts). The colours
+// here drive only the dashboard previews — the widget ships its own copies.
+//
+// `classic` is special: it is generated per bot from widget_color, so the
+// preview tint uses the bot's currently configured colour.
+// ---------------------------------------------------------------------------
+export interface WidgetThemePreview {
+  id: string;
+  name: string;
+  description: string;
+  /** CSS background for the preview's launcher bubble. */
+  launcherBg: string;
+  /** Launcher icon colour (sits on launcherBg). */
+  launcherIcon: string;
+  /** Preview window chrome. */
+  windowBg: string;
+  windowBorder: string;
+  headerBg: string;
+  headerText: string;
+  /** Preview chat bubbles. */
+  userBubbleBg: string;
+  userBubbleText: string;
+  assistantBubbleBg: string;
+  assistantBubbleText: string;
+}
+
+export const WIDGET_THEMES: WidgetThemePreview[] = [
+  {
+    id: "classic",
+    name: "Classic",
+    description: "The original light widget, tinted with your widget colour.",
+    launcherBg: "#6366f1",
+    launcherIcon: "#ffffff",
+    windowBg: "#ffffff",
+    windowBorder: "#e5e7eb",
+    headerBg: "#6366f1",
+    headerText: "#ffffff",
+    userBubbleBg: "#6366f1",
+    userBubbleText: "#ffffff",
+    assistantBubbleBg: "#f3f4f6",
+    assistantBubbleText: "#111827",
+  },
+  {
+    id: "cyber",
+    name: "Cyber",
+    description:
+      "Near-black surfaces, hairline borders and a cyan accent — the CyberAtlas look.",
+    launcherBg: "linear-gradient(135deg, #22d3ee 0%, #06b6d4 60%, #0e7490 100%)",
+    launcherIcon: "#04121a",
+    windowBg: "#0c121c",
+    windowBorder: "#1d2a3a",
+    headerBg: "linear-gradient(135deg, #101925 0%, #0c121c 100%)",
+    headerText: "#f1f5f9",
+    userBubbleBg: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+    userBubbleText: "#04121a",
+    assistantBubbleBg: "#151f2d",
+    assistantBubbleText: "#f1f5f9",
+  },
+  {
+    id: "aurora",
+    name: "Aurora",
+    description:
+      "Deep indigo night surfaces with violet gradient accents.",
+    launcherBg: "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)",
+    launcherIcon: "#ffffff",
+    windowBg: "#0b1020",
+    windowBorder: "#263463",
+    headerBg: "linear-gradient(135deg, #312e81 0%, #1e1b4b 100%)",
+    headerText: "#f5f3ff",
+    userBubbleBg: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+    userBubbleText: "#ffffff",
+    assistantBubbleBg: "#151d3d",
+    assistantBubbleText: "#f5f3ff",
+  },
+  {
+    id: "sunrise",
+    name: "Sunrise",
+    description: "Warm white surfaces with an orange sunrise gradient.",
+    launcherBg: "linear-gradient(135deg, #fb923c 0%, #ea580c 100%)",
+    launcherIcon: "#ffffff",
+    windowBg: "#ffffff",
+    windowBorder: "#fed7aa",
+    headerBg: "linear-gradient(135deg, #fb923c 0%, #ea580c 100%)",
+    headerText: "#fff7ed",
+    userBubbleBg: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+    userBubbleText: "#ffffff",
+    assistantBubbleBg: "#ffedd5",
+    assistantBubbleText: "#431407",
+  },
+];
+
+export const DEFAULT_WIDGET_THEME = "classic";
+
+/** Safe lookup: unknown ids (e.g. a theme added after this build) fall back to classic. */
+export function getWidgetTheme(
+  id: string | null | undefined,
+  widgetColor?: string | null,
+): WidgetThemePreview {
+  const theme = WIDGET_THEMES.find((t) => t.id === id) || WIDGET_THEMES[0];
+  if (theme.id === "classic" && widgetColor) {
+    return { ...theme, launcherBg: widgetColor, headerBg: widgetColor, userBubbleBg: widgetColor };
+  }
+  return theme;
+}
+
 // Bots
 export interface Bot {
   id: string;
@@ -154,6 +263,7 @@ export interface Bot {
   user_id: string;
   avatar?: string | null;
   widget_color?: string | null;
+  widget_theme?: string | null;
   widget_name?: string | null;
   welcome_message?: string | null;
   suggested_questions?: string[];
@@ -207,6 +317,7 @@ export const updateBot = async (
     name?: string;
     avatar?: string;
     widget_color?: string;
+    widget_theme?: string;
     widget_name?: string;
     welcome_message?: string;
     suggested_questions?: string[];
