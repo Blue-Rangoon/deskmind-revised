@@ -22,6 +22,7 @@ from app.deps import (
     require_bot_owner,
 )
 from app.models import Bot, Document, User
+from app.models.bot import show_sources_enabled
 from app.utils.widget_themes import WIDGET_THEMES, normalize_widget_theme
 
 router = APIRouter(prefix="/bots", tags=["bots"])
@@ -78,7 +79,7 @@ def _bot_to_response(bot: Bot, document_count: int = 0, request: Request | None 
         widget_name=bot.widget_name,
         welcome_message=bot.welcome_message,
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
-        show_sources=bool(bot.show_sources),
+        show_sources=show_sources_enabled(bot),
         document_count=document_count,
         created_at=bot.created_at.isoformat() if bot.created_at else None,
     )
@@ -222,7 +223,7 @@ def list_bots(
             widget_name=bot.widget_name,
             welcome_message=bot.welcome_message,
             suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
-            show_sources=bool(bot.show_sources),
+            show_sources=show_sources_enabled(bot),
             document_count=counts.get(str(bot.id), 0),
             created_at=bot.created_at.isoformat() if bot.created_at else None,
         )
@@ -301,7 +302,7 @@ def get_bot_config(
         widget_name=bot.widget_name or bot.name,
         welcome_message=bot.welcome_message or "",
         suggested_questions=json.loads(bot.suggested_questions) if bot.suggested_questions else [],
-        show_sources=bool(bot.show_sources),
+        show_sources=show_sources_enabled(bot),
     )
 
 

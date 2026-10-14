@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.deps import DbSession, get_bot_or_404, get_db
 from app.models import Bot, Conversation, Message
+from app.models.bot import show_sources_enabled
 from app.services.chat import (
     build_prompt,
     generate_answer,
@@ -260,6 +261,15 @@ def chat(
             degraded=observations.degraded,
             degraded_reason=observations.degraded_reason,
         )
+
+    # The bot owner's "show sources" preference is enforced here, server-side,
+    # so every consumer of this endpoint — the embedded widget (including
+    # browsers still running a cached bundle), the dashboard chat and any API
+    # client — stops receiving citations the moment the setting is switched
+    # off. Because the flag is read per request this also covers bots that
+    # were created before the setting existed.
+    if not show_sources_enabled(bot):
+        sources = []
 
     return ChatResponse(
         conversation_id=str(conversation.id),

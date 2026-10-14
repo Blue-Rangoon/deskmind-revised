@@ -10,6 +10,8 @@ import { sendChatMessage, createLead, getApiErrorMessage } from "@/lib/api";
 interface ChatTabProps {
   botId: string;
   botName: string;
+  /** The bot's "show sources" setting; when false only answers are shown. */
+  showSources?: boolean;
 }
 
 interface Source {
@@ -38,7 +40,7 @@ interface Message {
   };
 }
 
-export function ChatTab({ botId, botName }: ChatTabProps) {
+export function ChatTab({ botId, botName, showSources = true }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState("");
@@ -89,11 +91,13 @@ export function ChatTab({ botId, botName }: ChatTabProps) {
         role: "assistant",
         content: response.answer,
         timestamp: new Date().toISOString(),
-        sources: response.sources?.map((s: Source) => ({
-          document_filename: s.document_filename,
-          chunk_content: s.chunk_content,
-          similarity_score: s.similarity_score,
-        })),
+        sources: showSources
+          ? response.sources?.map((s: Source) => ({
+              document_filename: s.document_filename,
+              chunk_content: s.chunk_content,
+              similarity_score: s.similarity_score,
+            }))
+          : undefined,
         retrieval_details: response.retrieval_details,
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -197,7 +201,8 @@ export function ChatTab({ botId, botName }: ChatTabProps) {
                   })}
                 </p>
               )}
-              {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+              {showSources &&
+                msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
                 <div className="mt-3 border-t border-gray-200 pt-3">
                   <button
                     type="button"

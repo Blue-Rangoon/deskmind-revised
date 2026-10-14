@@ -75,6 +75,54 @@ class TestBots:
         assert data["name"] == "Updated Bot"
         assert data["widget_color"] == "#ff0000"
 
+    def test_update_bot_show_sources_flows_to_public_config(
+        self, client, test_user: User, test_bot: Bot
+    ):
+        """Toggling "show sources" in the bot settings must persist, read back
+        for the dashboard and be exposed on the public /config the widget uses."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+        response = client.patch(
+            f"/bots/{test_bot.id}",
+            json={"show_sources": False},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["show_sources"] is False
+
+        response = client.get(
+            f"/bots/{test_bot.id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["show_sources"] is False
+
+        response = client.get(f"/bots/{test_bot.id}/config")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["show_sources"] is False
+
+        # ...and switching it back on is honoured too.
+        response = client.patch(
+            f"/bots/{test_bot.id}",
+            json={"show_sources": True},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["show_sources"] is True
+
+    def test_legacy_bot_without_show_sources_defaults_to_enabled(self):
+        """Bots written before the setting existed (NULL column) keep the
+        historical behaviour: citations shown."""
+        from app.models.bot import show_sources_enabled
+
+        legacy_bot = Bot(name="legacy")
+        legacy_bot.show_sources = None
+        assert show_sources_enabled(legacy_bot) is True
+
+        legacy_bot.show_sources = False
+        assert show_sources_enabled(legacy_bot) is False
+
     def test_update_bot_widget_theme(self, client, test_user: User, test_bot: Bot):
         from app.utils.security import create_access_token
 

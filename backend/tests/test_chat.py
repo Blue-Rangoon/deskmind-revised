@@ -52,6 +52,47 @@ class TestChat:
 
     @patch("app.routes.chat.generate_answer")
     @patch("app.routes.chat.retrieve")
+    def test_chat_hides_sources_when_show_sources_disabled(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """With the bot's "show sources" setting off, the chat endpoint ships
+        the answer only — never the citations, for any client."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        test_bot.show_sources = False
+        db.commit()
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {}
+        mock_doc = MagicMock()
+        mock_doc.filename = "doc.pdf"
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = "The answer is 42."
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What is the answer?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["answer"] == "The answer is 42."
+        assert data["sources"] == []
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
     def test_chat_retrieval_refusal_no_llm_call(
         self,
         mock_retrieve,

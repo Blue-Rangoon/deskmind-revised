@@ -147,7 +147,16 @@ WIDGET_JS_PATHS = (
 def widget_js():
     for path in WIDGET_JS_PATHS:
         if path.exists():
-            return FileResponse(path, media_type="application/javascript")
+            return FileResponse(
+                path,
+                media_type="application/javascript",
+                # Embedded sites must pick up new bundles promptly: without
+                # this a browser (or a CDN in front of the API) can keep
+                # serving an old widget build that ignores settings such as
+                # "show sources". no-cache still allows conditional revalidation
+                # via the ETag/Last-Modified FileResponse sends.
+                headers={"Cache-Control": "no-cache, must-revalidate"},
+            )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": "Widget bundle not found. Build it with `npm run build` in the widget/ directory."},

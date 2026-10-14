@@ -37,3 +37,15 @@ class Bot(Base):
     documents: Mapped[list["Document"]] = relationship(back_populates="bot", cascade="all, delete-orphan")
     conversations: Mapped[list["Conversation"]] = relationship(back_populates="bot", cascade="all, delete-orphan")
     leads: Mapped[list["Lead"]] = relationship(back_populates="bot", cascade="all, delete-orphan")
+
+
+def show_sources_enabled(bot: Bot) -> bool:
+    """Resolve the bot owner's "show sources" preference.
+
+    A NULL value (rows created before the column existed / before the
+    backfill migration ran) is treated as enabled so previously created bots
+    keep the historical behaviour of showing citations under each answer.
+    """
+    if bot.show_sources is None:
+        return True
+    return bool(bot.show_sources)

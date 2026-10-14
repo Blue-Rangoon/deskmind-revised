@@ -176,7 +176,11 @@ export default function BotDetailPage() {
           <KnowledgeTab botId={botId} />
         )}
         {activeTab === "chat" && (
-          <ChatTab botId={botId} botName={bot.name} />
+          <ChatTab
+            botId={botId}
+            botName={bot.name}
+            showSources={bot.show_sources ?? true}
+          />
         )}
         {activeTab === "embed" && (
           <EmbedTab botId={botId} botName={bot.name} avatar={bot.avatar} />
