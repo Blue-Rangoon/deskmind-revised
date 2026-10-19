@@ -74,7 +74,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 ## 📸 Showcase
 
 ![Landing Page](screenshots/landing.png)
-![Login Page](screenshots/login.png)
+![Login Page](screenshots/login.png) ![Login Page](screenshots/guest-login.png) 
 
 ### 🖥️ Dashboard
 
