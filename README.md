@@ -1,6 +1,6 @@
 <div align="center">
 
-![Project Preview](./screenshots/deskmind-banner.png)
+![Project Preview](/screenshots/deskmind-banner.png)
 
 <!-- ⌨️ Typing animation -->
 <a href="https://github.com/Shr2005-dot/deskmind">
