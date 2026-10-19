@@ -73,15 +73,15 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 ## 📸 Showcase
 
-> 📝 **Note:** Replace each placeholder below with your own screenshot. Suggested path: `screenshots/<file-name>.png`. Delete this note once done.
+![Landing Page](screenshots/landing.png)
+![Login Page](screenshots/login.png)
 
 ### 🖥️ Dashboard
 
 #### 🏠 Dashboard Overview
 
-> 📸 **[ATTACH SCREENSHOT HERE: Main dashboard home page showing the list of bots]**
-
-![Dashboard Overview](screenshots/dashboard-overview.png)
+## Create Bot(s)
+![Dashboard Overview](screenshots/dashboard1.png)
 
 #### 🤖 Bot Creation & Customization
 
