@@ -1,3 +1,30 @@
+<div align="center">
+
+![Project Preview](./screenshots/deskmind-banner.png)
+
+<!-- ⌨️ Typing animation -->
+<a href="https://github.com/Shr2005-dot/deskmind">
+  <img src="https://readme-typing-svg.herokuapp.com/?font=Fira+Code&weight=600&size=24&duration=2800&pause=900&color=A855F7&center=true&vCenter=true&width=760&height=60&lines=DeskMind+%F0%9F%A7%A0;Build%2C+Train%2C+and+Embed+AI+Bots;Upload+Your+Knowledge+Base+%2B+Custom+UI;Deploy+Seamlessly+on+Any+Website" alt="Typing SVG" />
+</a>
+
+<!-- <br><br> -->
+
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)](https://next.js.org/)
+[![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Hosted-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+**[🧠 About](#-about)** •
+**[✨ Features](#-features)** •
+**[🛠️ Tech Stack](#️-tech-stack)** •
+**[🚀 Quick Start](#-quick-start)** •
+**[🌐 Deployment](#-deployment)**
+
+</div>
+
+---
+
 # DeskMind
 
 DeskMind is an AI-powered knowledge management platform that lets you upload documents and websites, then chat with them through a conversational AI interface. It combines a full-stack web app with an embeddable chat widget, built around a transparent, multi-stage RAG pipeline.
