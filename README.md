@@ -73,8 +73,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 ## 📸 Showcase
 
-![Landing Page](screenshots/landing.png)
-![Login Page](screenshots/login.png) ![Login Page](screenshots/guest-login.png) 
+![Landing Page](screenshots/landing.png) 
 
 ### 🖥️ Dashboard
 
@@ -87,9 +86,10 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 ![Bot Customization](screenshots/dashboard1.png)
 ![Bot Customization](screenshots/bot-customization.png)
-![Bot Overview](screenshots/customization1.png)
-![Bot Overview](screenshots/customization3.png)
-![Bot Overview](screenshots/customization2.png)
+
+![Bot Overview](screenshots/customize1.png)
+![Bot Overview](screenshots/customize2.png)
+![Bot Overview](screenshots/customize3.png)
 
 #### 📄 Knowledge Base & Document Upload
 
@@ -123,9 +123,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 🔐 Login / Signup
 
-> 📸 **[ATTACH SCREENSHOT HERE: Login page with email/password and Google OAuth]**
-
-![Authentication](screenshots/auth.png)
+![Login Page](screenshots/login.png) ![Login Page](screenshots/guest-login.png)
 
 ### 🌍 Embeddable Widget on a Live Website
 
