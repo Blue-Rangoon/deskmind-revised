@@ -84,6 +84,35 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
     }
   };
 
+  // The "show sources" toggle saves itself the moment it is flipped. It is the
+  // exact setting the deployed widget and the chat API honour, so switching it
+  // off and opening the "Test a bot" chat must behave the same way — without
+  // requiring a "Save Changes" click that is easy to forget.
+  const handleToggleSources = async (checked: boolean) => {
+    const previous = showSources;
+    setShowSources(checked);
+    try {
+      const updated = await updateBot(botId, { show_sources: checked });
+      if (bot) {
+        // Merge only this field so other unsaved edits in this form survive.
+        onSave({ ...bot, show_sources: updated.show_sources ?? checked });
+      }
+      toast.success(
+        checked
+          ? "Sources will be shown under answers"
+          : "Sources hidden from answers",
+      );
+    } catch (err: unknown) {
+      // Roll back so the switch never lies about what is stored.
+      setShowSources(previous);
+      const message =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail ||
+        (err instanceof Error ? err.message : "Failed to update sources setting");
+      toast.error(message);
+    }
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -197,9 +226,11 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
       <Card className="p-6">
         <h3 className="text-base font-semibold text-gray-900 mb-1">Sources</h3>
         <p className="text-sm text-gray-500 mb-5">
-          Control whether cited sources appear under each answer in the chat
-          widget. When enabled, visitors can click "View sources" to expand the
-          documents the answer was grounded in.
+          Control whether cited sources appear under each answer. When enabled,
+          visitors can click "View sources" to expand the documents the answer
+          was grounded in. When disabled, answers are shown on their own — no
+          document names, pages or citations, in the "Test a bot" chat and in
+          the deployed widget alike. This switch saves immediately.
         </p>
         <div className="flex items-center gap-4">
           <label
@@ -209,7 +240,7 @@ export function SettingsTab({ botId, bot, onSave }: SettingsTabProps) {
             <input
               type="checkbox"
               checked={showSources}
-              onChange={(e) => setShowSources(e.target.checked)}
+              onChange={(e) => handleToggleSources(e.target.checked)}
               className="sr-only"
             />
             <span

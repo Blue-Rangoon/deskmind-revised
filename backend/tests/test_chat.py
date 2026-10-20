@@ -93,6 +93,240 @@ class TestChat:
 
     @patch("app.routes.chat.generate_answer")
     @patch("app.routes.chat.retrieve")
+    def test_chat_prompt_hides_document_attribution_when_sources_disabled(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """With sources off the model must not be shown (or asked for) document
+        metadata — otherwise it cites "faq.pdf, page 1" inside the answer text,
+        which is exactly what the toggle is supposed to hide."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        test_bot.show_sources = False
+        db.commit()
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {"page": 3}
+        mock_doc = MagicMock()
+        mock_doc.filename = "faq.pdf"
+        mock_doc.source_type = "pdf"
+        mock_doc.source_url = None
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = "The answer is 42."
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What is the answer?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        prompt = mock_generate.call_args[0][0]
+        assert "faq.pdf" not in prompt
+        assert "File:" not in prompt
+        assert "Page: 3" not in prompt
+        assert "has hidden where answers come from" in prompt
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
+    def test_chat_prompt_keeps_document_attribution_by_default(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """Bots with sources enabled keep the historical behaviour: the prompt
+        carries the source metadata and the citation instruction."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {"page": 3}
+        mock_doc = MagicMock()
+        mock_doc.filename = "faq.pdf"
+        mock_doc.source_type = "pdf"
+        mock_doc.source_url = None
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = "The answer is 42."
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What is the answer?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        prompt = mock_generate.call_args[0][0]
+        assert "File: faq.pdf" in prompt
+        assert "Page: 3" in prompt
+        assert "When citing sources" in prompt
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
+    def test_chat_strips_citation_line_from_answer_when_sources_disabled(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """A model that cites anyway must not leak the attribution to the user:
+        the answer ships without its "Source:" line and with no citations."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        test_bot.show_sources = False
+        db.commit()
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {}
+        mock_doc = MagicMock()
+        mock_doc.filename = "faq.pdf"
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = "The answer is 42.\n\nSources: faq.pdf, page 3"
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What is the answer?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["answer"] == "The answer is 42."
+        assert "faq.pdf" not in data["answer"]
+        assert data["sources"] == []
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
+    def test_chat_strips_trailing_citation_from_answer_when_sources_disabled(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """Trailing "(Source: …)" tails are removed too, and the cleaned answer
+        is what gets persisted to the conversation history."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        test_bot.show_sources = False
+        db.commit()
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {}
+        mock_doc = MagicMock()
+        mock_doc.filename = "faq.pdf"
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = "The answer is 42. (Source: faq.pdf, p. 3)"
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What is the answer?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["answer"] == "The answer is 42."
+        assert data["sources"] == []
+
+        stored = (
+            db.query(Message)
+            .filter(Message.conversation_id == uuid.UUID(data["conversation_id"]))
+            .filter(Message.role == "assistant")
+            .all()
+        )
+        assert len(stored) == 1
+        assert stored[0].content == "The answer is 42."
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
+    def test_chat_strips_markdown_sources_block_when_sources_disabled(
+        self,
+        mock_retrieve,
+        mock_generate,
+        client,
+        test_user: User,
+        test_bot: Bot,
+        db,
+    ):
+        """Regression: a markdown "**Sources**:" tail with bracketed page
+        references (the format the UITU scholarship bot produced) must not
+        reach the user when the setting is off."""
+        from app.utils.security import create_access_token
+
+        token = create_access_token(data={"sub": str(test_user.id)})
+
+        test_bot.show_sources = False
+        db.commit()
+
+        mock_context = MagicMock()
+        mock_context.observations.refusal = False
+        mock_chunk = MagicMock()
+        mock_chunk.content = "context chunk"
+        mock_chunk.metadata_ = {}
+        mock_doc = MagicMock()
+        mock_doc.filename = "UITU-Scholarship-Policy.pdf"
+        mock_context.chunks = [(mock_chunk, mock_doc, 0.95)]
+        mock_retrieve.return_value = mock_context
+        mock_generate.return_value = (
+            "Scholarships cover fresh intake and continuing students. "
+            "**Sources**: UITU-Scholarship-Policy.pdf, Page 1 (fresh intake) and "
+            "Page 2 (other aid)"
+            "【Document: UITU-Scholarship-Policy.pdf | Page: 1】, "
+            "【Document: UITU-Scholarship-Policy.pdf | Page: 2】"
+        )
+
+        response = client.post(
+            f"/bots/{test_bot.id}/chat",
+            json={"message": "What scholarships are available?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["answer"] == (
+            "Scholarships cover fresh intake and continuing students."
+        )
+        assert "Page 1" not in data["answer"]
+        assert "UITU" not in data["answer"]
+        assert "【" not in data["answer"]
+        assert data["sources"] == []
+
+    @patch("app.routes.chat.generate_answer")
+    @patch("app.routes.chat.retrieve")
     def test_chat_retrieval_refusal_no_llm_call(
         self,
         mock_retrieve,
