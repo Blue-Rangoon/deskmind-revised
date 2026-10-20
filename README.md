@@ -80,26 +80,24 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 🏠 Dashboard Overview
 
-##### Create Bot(s)
-![Dashboard Overview](screenshots/dashboard1.png)
+![Dashboard Overview](screenshots/dashboard-plain.png)
+![Dashboard Overview](screenshots/my-bots.png)
 
 #### 🤖 Bot Creation & Customization
 
-> 📸 **[ATTACH SCREENSHOT HERE: Create/edit bot screen with name, avatar, theme, and welcome message settings]**
-
+![Bot Customization](screenshots/dashboard1.png)
 ![Bot Customization](screenshots/bot-customization.png)
+![Bot Overview](screenshots/customization1.png)
+![Bot Overview](screenshots/customization3.png)
+![Bot Overview](screenshots/customization2.png)
 
 #### 📄 Knowledge Base & Document Upload
 
-> 📸 **[ATTACH SCREENSHOT HERE: Documents page showing uploaded PDFs / URLs and their ingestion status]**
-
-![Document Upload](screenshots/document-upload.png)
+![Document Upload](screenshots/knowledge-base.png)
 
 #### 🌐 URL Ingestion
 
-> 📸 **[ATTACH SCREENSHOT HERE: Add URL dialog and an ingested web page in the document list]**
-
-![URL Ingestion](screenshots/url-ingestion.png)
+![Document Upload](screenshots/add-kbase.png)
 
 #### 💬 Chat Testing Playground
 
@@ -114,8 +112,6 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 ![Retrieval Debug](screenshots/retrieval-debug.png)
 
 #### 📈 Analytics
-
-> 📸 **[ATTACH SCREENSHOT HERE: Analytics page with conversation/usage charts]**
 
 ![Analytics](screenshots/analytics.png)
 
@@ -135,9 +131,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 🪄 Widget Launcher (Closed State)
 
-> 📸 **[ATTACH SCREENSHOT HERE: Live website with the chat bubble in the corner]**
-
-![Widget Closed](screenshots/widget-closed.png)
+![Widget Closed](screenshots/deploy.png)
 
 #### 💬 Widget Conversation (Open State)
 
@@ -156,12 +150,6 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 > 📸 **[ATTACH SCREENSHOT HERE: Widget running on a mobile viewport]**
 
 ![Widget Mobile](screenshots/widget-mobile.png)
-
-### 🎬 Demo (Optional)
-
-> 📸 **[ATTACH GIF / VIDEO HERE: Short walkthrough of upload → chat → embed]**
-
-![Demo](screenshots/demo.gif)
 
 ---
 
