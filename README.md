@@ -127,7 +127,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 🚫 Grounded "I don't know" Response
 
-![Widget Fallback](screenshots/idkk.png)
+![Widget Fallback](screenshots/idk.png)
 
 ---
 
