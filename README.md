@@ -99,23 +99,17 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 💬 Chat Testing Playground
 
-> 📸 **[ATTACH SCREENSHOT HERE: In-dashboard chat with a question, answer, and source citations]**
-
-![Chat Playground](screenshots/chat-playground.png)
+![Chat Playground](screenshots/chat-test.png)
 
 #### 🔬 Retrieval Debug View
 
-> 📸 **[ATTACH SCREENSHOT HERE: Chat response with retrieval debug details (rewritten query, candidate counts, relevance scores)]**
-
-![Retrieval Debug](screenshots/retrieval-debug.png)
+![Retrieval Debug](screenshots/convos.png)
 
 #### 📈 Analytics
 
 ![Analytics](screenshots/analytics.png)
 
 #### 🧲 Leads
-
-> 📸 **[ATTACH SCREENSHOT HERE: Leads table showing captured visitor details]**
 
 ![Leads](screenshots/leads.png)
 
@@ -125,13 +119,9 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 ### 🌍 Embeddable Widget on a Live Website
 
-#### 🪄 Widget Launcher (Closed State)
-
 ![Widget Closed](screenshots/deploy.png)
 
 #### 💬 Widget Conversation (Open State)
-
-> 📸 **[ATTACH SCREENSHOT HERE: Widget open on the website, showing a real conversation with sources]**
 
 ![Widget Open](screenshots/widget-open.png)
 
@@ -140,12 +130,6 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 > 📸 **[ATTACH SCREENSHOT HERE: Widget answering an out-of-scope question with the "I don't know" fallback]**
 
 ![Widget Fallback](screenshots/widget-fallback.png)
-
-#### 📱 Mobile View (Optional)
-
-> 📸 **[ATTACH SCREENSHOT HERE: Widget running on a mobile viewport]**
-
-![Widget Mobile](screenshots/widget-mobile.png)
 
 ---
 
