@@ -115,7 +115,7 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 🔐 Login / Signup
 
-![Login Page](screenshots/login.png) ![Login Page](screenshots/guest-login.png)
+![Login Page](screenshots/login.png) 
 
 ### 🌍 Embeddable Widget on a Live Website
 
