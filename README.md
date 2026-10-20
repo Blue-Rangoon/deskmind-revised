@@ -85,8 +85,6 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 #### 🤖 Bot Creation & Customization
 
 ![Bot Customization](screenshots/dashboard1.png)
-![Bot Customization](screenshots/bot-customization.png)
-
 ![Bot Overview](screenshots/customize1.png)
 ![Bot Overview](screenshots/customize2.png)
 ![Bot Overview](screenshots/customize3.png)
