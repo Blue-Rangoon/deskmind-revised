@@ -123,13 +123,11 @@ Instead of a black-box chatbot, DeskMind gives you full control and visibility:
 
 #### 💬 Widget Conversation (Open State)
 
-![Widget Open](screenshots/widget-open.png)
+![Widget Open](screenshots/live.png)
 
 #### 🚫 Grounded "I don't know" Response
 
-> 📸 **[ATTACH SCREENSHOT HERE: Widget answering an out-of-scope question with the "I don't know" fallback]**
-
-![Widget Fallback](screenshots/widget-fallback.png)
+![Widget Fallback](screenshots/idkk.png)
 
 ---
 
