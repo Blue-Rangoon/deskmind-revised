@@ -19,6 +19,7 @@ from app.services.chat import (
     build_prompt,
     generate_answer,
     get_recent_messages,
+    strip_citations,
     _looks_like_refusal,
     should_prompt_for_email,
     classify_intent,
@@ -102,6 +103,14 @@ def chat(
     x_debug_retrieval: Optional[str] = Header(default=None, alias="x-debug-retrieval"),
 ):
     bot = get_bot_or_404(bot_id, db)
+
+    # The bot owner's "show sources" preference, resolved once per request so
+    # every part of the answer obeys it consistently: the citation metadata the
+    # model is allowed to see, the citations inside the answer text, and the
+    # ``sources`` payload shipped back to the dashboard test chat, the embedded
+    # widget and any API consumer. Reading it per request also covers bots
+    # created before the setting existed (NULL column defaults to enabled).
+    cite_sources = show_sources_enabled(bot)
 
     # Get or create conversation
     conversation_id = request.conversation_id
@@ -205,7 +214,9 @@ def chat(
                 sources = []
                 prompt_for_email = False
             else:
-                prompt = build_prompt(request.message, context.chunks)
+                prompt = build_prompt(
+                    request.message, context.chunks, cite_sources=cite_sources
+                )
                 try:
                     answer_text = generate_answer(prompt)
                 except Exception:
@@ -232,6 +243,13 @@ def chat(
                             question=request.message,
                             has_relevant_chunks=len(sources) > 0,
                         )
+
+    # Sources are hidden for this bot: strip any attribution the model still
+    # wrote into the reply ("Source: faq.pdf, page 1") so the user sees the
+    # answer and nothing about where it came from. Done before persisting so
+    # the stored history — reused for later turns — stays clean too.
+    if not cite_sources:
+        answer_text = strip_citations(answer_text)
 
     # Save assistant message
     assistant_message = Message(
@@ -262,13 +280,11 @@ def chat(
             degraded_reason=observations.degraded_reason,
         )
 
-    # The bot owner's "show sources" preference is enforced here, server-side,
-    # so every consumer of this endpoint — the embedded widget (including
-    # browsers still running a cached bundle), the dashboard chat and any API
-    # client — stops receiving citations the moment the setting is switched
-    # off. Because the flag is read per request this also covers bots that
-    # were created before the setting existed.
-    if not show_sources_enabled(bot):
+    # Finally, the citations payload itself is dropped server-side, so every
+    # consumer of this endpoint — the embedded widget (including browsers still
+    # running a cached bundle), the dashboard's "Test a bot" chat and any API
+    # client — stops receiving citations the moment the setting is switched off.
+    if not cite_sources:
         sources = []
 
     return ChatResponse(

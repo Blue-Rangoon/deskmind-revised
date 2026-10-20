@@ -16,6 +16,7 @@ from app.services.chat import (
     _looks_like_refusal,
     build_context,
     build_prompt,
+    strip_citations,
     _token_count,
 )
 from app.services.ingestion import chunk_text
@@ -334,6 +335,130 @@ class TestContextConstruction:
         second_pos = result.index("content 1")
         third_pos = result.index("content 2")
         assert first_pos < second_pos < third_pos
+
+
+# ---------------------------------------------------------------------------
+# "Show sources" toggle — prompt-side enforcement
+# ---------------------------------------------------------------------------
+class TestSourceCitationControl:
+    """The toggle must control what the model is told, not only what is shown.
+
+    When the owner hides sources the model gets no document metadata and is
+    told not to attribute its answer, so the reply itself never mentions the
+    document it came from.
+    """
+
+    def _chunks(self):
+        chunk = MagicMock()
+        chunk.content = "Refund policy content."
+        chunk.metadata_ = {"page": 3}
+        doc = MagicMock()
+        doc.filename = "refund-policy.pdf"
+        doc.source_type = "pdf"
+        doc.source_url = None
+        doc.title = "Refund Policy"
+        return [(chunk, doc, 0.92)]
+
+    def test_build_context_hides_metadata_when_disabled(self):
+        result = build_context(self._chunks(), show_source_metadata=False)
+        assert "Refund policy content." in result
+        assert "refund-policy.pdf" not in result
+        assert "Refund Policy" not in result
+        assert "Page: 3" not in result
+
+    def test_build_prompt_hides_attribution_when_disabled(self):
+        prompt = build_prompt(
+            "What is the policy?", self._chunks(), cite_sources=False
+        )
+        assert "Refund policy content." in prompt
+        assert "refund-policy.pdf" not in prompt
+        assert "Page: 3" not in prompt
+        assert "has hidden where answers come from" in prompt
+        assert "When citing sources" not in prompt
+
+    def test_build_prompt_keeps_attribution_by_default(self):
+        prompt = build_prompt("What is the policy?", self._chunks())
+        assert "File: refund-policy.pdf" in prompt
+        assert "Page: 3" in prompt
+        assert "When citing sources" in prompt
+
+    @pytest.mark.parametrize(
+        "answer,expected",
+        [
+            # Plain answers pass through untouched.
+            ("The answer is 42.", "The answer is 42."),
+            # Standalone citation lines are dropped.
+            ("The answer is 42.\n\nSource: faq.pdf, page 1", "The answer is 42."),
+            ("The answer is 42.\nSources: faq.pdf, 1", "The answer is 42."),
+            # Trailing attribution is dropped.
+            ("The answer is 42. (Source: faq.pdf, p. 1)", "The answer is 42."),
+            ("The answer is 42. Source: faq.pdf, 1", "The answer is 42."),
+            # Markdown-bold header + full-width bracketed page references — the
+            # exact shape the model produced for the UITU scholarship bot.
+            (
+                "Scholarships cover fresh intake and continuing students."
+                " **Sources**: UITU-Scholarship-Policy.pdf, Page 1 (fresh intake)"
+                " and Page 2 (other aid)"
+                "【Document: UITU-Scholarship-Policy.pdf | Page: 1】, "
+                "【Document: UITU-Scholarship-Policy.pdf | Page: 2】",
+                "Scholarships cover fresh intake and continuing students.",
+            ),
+            # A "Sources" section with its bullet list is removed as one block.
+            (
+                "The answer is 42.\n\n**Sources**:\n"
+                "- UITU-Scholarship-Policy.pdf, Page 1 (fresh intake)\n"
+                "- UITU-Scholarship-Policy.pdf, Page 2 (other aid)",
+                "The answer is 42.",
+            ),
+            # Bracketed references on their own line.
+            (
+                "The answer is 42.\n\n"
+                "【Document: faq.pdf | Page: 1】, 【Document: faq.pdf | Page: 2】",
+                "The answer is 42.",
+            ),
+            # Per-page section headers.
+            (
+                "The answer is 42.\n\n**Page 1**: scholarships\n**Page 2**: other aid",
+                "The answer is 42.",
+            ),
+            # A stray bullet that names a file, with no header above it.
+            (
+                "The answer is 42.\n- faq.pdf, Page 3",
+                "The answer is 42.",
+            ),
+            # Inline "(Source: *file*, Page N)" citations repeated inside list
+            # items — captured from the live rasha bot before the fix. The list
+            # items themselves must survive.
+            (
+                "1. Merit Scholarship – 100 % concession. "
+                "(Source: *UITU‑Scholarship‑Policy.pdf*, Page 1)\n\n"
+                "2. Top Achievers – 75 % waiver. "
+                "(Source: *UITU‑Scholarship‑Policy.pdf*, Page 1)",
+                "1. Merit Scholarship – 100 % concession.\n\n"
+                "2. Top Achievers – 75 % waiver.",
+            ),
+            # Parentheticals that are not citations must survive.
+            (
+                "Fill the form (see the attached page 1 form) before Friday.",
+                "Fill the form (see the attached page 1 form) before Friday.",
+            ),
+            # A content bullet that names a file mid-sentence survives.
+            (
+                "Steps:\n1. Download the handbook.pdf from the portal\n2. Submit it",
+                "Steps:\n1. Download the handbook.pdf from the portal\n2. Submit it",
+            ),
+            # Content bullets that merely mention a page are NOT citations and
+            # must survive.
+            (
+                "Steps:\n- Sign page 1 of the form\n- Submit it",
+                "Steps:\n- Sign page 1 of the form\n- Submit it",
+            ),
+            # Never strip the answer down to nothing.
+            ("Source: faq.pdf", "Source: faq.pdf"),
+        ],
+    )
+    def test_strip_citations(self, answer, expected):
+        assert strip_citations(answer) == expected
 
 
 # ---------------------------------------------------------------------------

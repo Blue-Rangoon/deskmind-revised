@@ -309,6 +309,8 @@ Document: Refund Policy | File: refund-policy.pdf | Type: pdf | Page: 3 | Releva
 
 Sources correspond exactly to chunks provided to the LLM. When the answer is unsupported, `sources = []`.
 
+When a bot's **Show sources** setting is off, the toggle is enforced entirely server-side: the prompt carries no document/file/page metadata, the model is told not to attribute its answer, any `Source:` tail it writes anyway is stripped from the reply, and `sources` ships empty. The result is a plain answer for every consumer — the dashboard's **Test a bot** chat, the embedded widget and API clients behave identically.
+
 ### 🔬 Retrieval Observability
 
 When the dashboard sends the `x-debug-retrieval: 1` header, the chat response includes:
