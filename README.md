@@ -481,10 +481,6 @@ Once your backend is deployed and the widget bundle is served at `/widget.js`, a
 
 The widget is a self-contained Vanilla TypeScript IIFE, so it has no framework dependencies and **auto-discovers the API origin** from where it was loaded.
 
-> 📸 **[ATTACH SCREENSHOT HERE: Dashboard "Embed" / "Install" page showing the generated snippet]**
-
-![Embed Snippet](screenshots/embed-snippet.png)
-
 ---
 
 ## 🌐 Deployment

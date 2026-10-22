@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AppLogo } from "@/components/branding/AppLogo";
 
@@ -225,6 +225,7 @@ function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: 
 }
 
 export default function Home() {
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
   const inViewRefs = [
     useInView(),
     useInView(),
@@ -610,6 +611,105 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQs */}
+      <section id="faqs" className="py-16 lg:py-24 border-t border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="FAQs"
+            title="Questions? We’ve got answers."
+            subtitle="Learn how DeskMind helps you build a more trustworthy support experience."
+          />
+          <div className="mx-auto mt-10 max-w-3xl space-y-3">
+            {[
+              {
+                question: "What is DeskMind?",
+                answer:
+                  "DeskMind lets you create AI assistants that answer questions using your business documents and website content.",
+              },
+              {
+                question: "What knowledge sources can I add?",
+                answer:
+                  "You can add PDF documents, website URLs, and text or Markdown content to your bot’s knowledge base.",
+              },
+              {
+                question: "How does DeskMind keep answers grounded?",
+                answer:
+                  "DeskMind retrieves relevant information from your knowledge base, uses it to answer questions, and can show the source of an answer. If it cannot find sufficient information, it is designed to say so rather than guess.",
+              },
+              {
+                question: "Can I add my chatbot to my website?",
+                answer:
+                  "Yes. DeskMind provides an embeddable chat widget that you can customize and add to your website.",
+              },
+              {
+                question: "Can I try DeskMind before setting up Google sign-in?",
+                answer:
+                  "Yes. You can create a guest account to get started, or sign up with Google for unlimited bots.",
+              },
+              {
+                question: "Can I manage multiple bots?",
+                answer:
+                  "Yes. Create and manage your bots from the DeskMind dashboard. Guest accounts can create up to two bots, while Google accounts support unlimited bots.",
+              },
+            ].map(({ question, answer }, index) => {
+              const isOpen = openFaq === question;
+
+              return (
+                <div
+                  key={question}
+                  className={`rounded-xl border bg-white px-4 shadow-sm transition-colors duration-200 sm:px-6 ${
+                    isOpen ? "border-primary-200" : "border-border"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${index}`}
+                    onClick={() =>
+                      setOpenFaq((current) =>
+                        current === question ? null : question,
+                      )
+                    }
+                    className="flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left text-sm font-semibold text-gray-900 sm:py-5 sm:text-base"
+                  >
+                    {question}
+                    <svg
+                      aria-hidden="true"
+                      className={`h-5 w-5 shrink-0 text-primary-600 transition-transform duration-300 ease-in-out motion-reduce:transition-none ${
+                        isOpen ? "rotate-45" : ""
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 5v14m-7-7h14"
+                      />
+                    </svg>
+                  </button>
+                  <div
+                    id={`faq-answer-${index}`}
+                    aria-hidden={!isOpen}
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out motion-reduce:transition-none ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <p className="pb-4 pr-8 text-sm leading-relaxed text-gray-600 sm:pb-5">
+                        {answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Account options */}
       <section id="accounts" className="py-16 lg:py-24 border-t border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -714,7 +814,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-sm font-semibold text-gray-900">Product</p>
               <ul className="mt-3 space-y-2 text-sm text-gray-600">
@@ -739,9 +839,92 @@ export default function Home() {
                 <li><a href="#use-cases" className="hover:text-gray-900">Contact</a></li>
               </ul>
             </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Safety</p>
+              <ul className="mt-3 space-y-2 text-sm text-gray-600">
+                <li><Link href="/privacy-policy" className="hover:text-gray-900">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-gray-900">Terms of Service</Link></li>
+                <li><Link href="/responsible-use" className="hover:text-gray-900">Responsible Use</Link></li>
+                <li><Link href="/#faqs" className="hover:text-gray-900">FAQs</Link></li>
+                <li><Link href="/sitemap.xml" className="hover:text-gray-900">Sitemap</Link></li>
+              </ul>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <p className="text-sm font-semibold text-gray-900">Follow DeskMind</p>
+              <ul className="mt-3 flex items-center gap-3">
+                {[
+                  {
+                    label: "GitHub",
+                    href: "https://github.com/Shr2005-dot",
+                    icon: (
+                      <path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.05c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.74.08-.74 1.2.08 1.83 1.24 1.83 1.24 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.62-2.8 5.64-5.48 5.94.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z" />
+                    ),
+                  },
+                  {
+                    label: "LinkedIn",
+                    href: "https://www.linkedin.com/in/shaffan-rizwan-72a255216",
+                    icon: (
+                      <path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z" />
+                    ),
+                  },
+                  // {
+                  //   label: "Instagram",
+                  //   icon: (
+                  //     <>
+                  //       <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2" />
+                  //       <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                  //       <circle cx="18" cy="6" r="1.25" fill="currentColor" />
+                  //     </>
+                  //   ),
+                  // },
+                  // {
+                  //   label: "Facebook",
+                  //   icon: (
+                  //     <path fill="currentColor" d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.3V13h2.8v8h3.4Z" />
+                  //   ),
+                  // },
+                ].map(({ label, href, icon }) => {
+                  const iconContent = (
+                    <svg
+                      aria-hidden="true"
+                      className="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:scale-110"
+                      viewBox="0 0 24 24"
+                    >
+                      {icon}
+                    </svg>
+                  );
+                  const className = "group inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-gray-600 transition-colors duration-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600";
+
+                  return (
+                    <li key={label}>
+                      {href ? (
+                        <a
+                          href={href}
+                          aria-label={label}
+                          className={className}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {iconContent}
+                        </a>
+                      ) : (
+                        <span
+                          aria-label={`${label} link coming soon`}
+                          title={`${label} link coming soon`}
+                          className={`${className} cursor-not-allowed opacity-50`}
+                        >
+                          {iconContent}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
-          <div className="mt-10 border-t border-border pt-6 text-xs text-gray-500">
+          <div className="mt-10 flex flex-col gap-2 border-t border-border pt-6 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
             © {new Date().getFullYear()} DeskMind. All rights reserved.
+            {/* <Link href="/sitemap.xml" className="hover:text-gray-900">Sitemap</Link> */}
           </div>
         </div>
       </footer>
